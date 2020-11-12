@@ -32,7 +32,7 @@ import seaborn as sns
 import warnings
 warnings.filterwarnings('ignore')
 import pyodbc
-#from mplwidget import MplWidget
+from mplwidget import MplWidget
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.figure import Figure
 
