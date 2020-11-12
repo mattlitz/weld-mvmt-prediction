@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import*
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 fromm matplotlib.figure import FigureCanvas
 
-class MplWidget(QWidget):
+class MplWeldWidget(QWidget):
 
     def __init__(self, parent = None):
 
