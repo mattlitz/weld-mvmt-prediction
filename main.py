@@ -1,52 +1,48 @@
 import sys
 import numpy as np
 import pandas as pd
+import seaborn as sns
+import pyodbc
 
 from PyQt5 import*
 from PyQt5.uic import loadUi
-#from PyQt5.QtWidgets import *
-#from PyQt5 import QtCore,QtGui,QtWidgets,QtPrintSupport
-#from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import*
+from PyQt5 import QtCore,QtGui,QtWidgets,QtPrintSupport
+from PyQt5.QtGui import QPixmap
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from scipy import stats
-from scipy.optimize import minimize
+#from scipy import stats
+#from scipy.optimize import minimize
 from sklearn.linear_model import LassoCV
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler, PolynomialFeatures, OneHotEncoder #categorical data
-from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, PolynomialFeatures #OneHotEncoder #categorical data
+#from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, make_scorer, accuracy_score
-import seaborn as sns
 import warnings
 warnings.filterwarnings('ignore')
-import pyodbc
-from mplwidget import MplWeldWidget
+from mplweldwidget import MplWeldWidget
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.figure import Figure
 
 #import logos..
 
-
 def show_exception_and_exit(exc_type,exc_value,tb):
-    import tracebacktraceback.print_exception(exc_type,exc_value,tb)
+    import traceback
+    traceback.print_exception(exc_type,exc_value,tb)
     print("Invalid Input")
     sys.exit(-1)
 
 sys.excepthook=show_exception_and_exit
 
-class MatplotlibWidget(QMainWindow)
+class WeldPredictionMain(QMainWindow):
 
     def __init__(self):
 
         QMainWindow.__init__(self)
 
-        loadUi("C:\Users\mattl\Documents\projects\weld_mvmt_prediction_app\main_window.ui")
+        loadUi(r"C:\Users\mattl\Documents\projects\weld-mvmt-prediction\main_window.ui",self)
 
         self.setWindowTitle("Weld Movement Prediction App")
-    
-	
-
-        self.setWindowTitle("")
-        self.setWindowIcon(QtGui.QIcon('C\ logo.jpg'))
+        #self.setWindowIcon(QtGui.QIcon('C:\logo.jpg'))
 
         self.calculateButton.clicked.connect(self.pred_twist)
         self.exitButton.clicked.connect(self.close)
@@ -58,11 +54,13 @@ class MatplotlibWidget(QMainWindow)
         self.progressBar.setValue(self.completed)
 
         #initialize values
-        self.guess_p.setText("0")
+        #self.guess_p.setText("0")
 
-    def checkbox(self):
-        self.mixedBox.isChecked()
+        #initialize alloy options
+        self.alloy_comboBox.addItem("Ti-6Al-4V")
+        self.alloy_comboBox.addItem("Mg AZ80A")
 
+    
     def __del__(self):
         sys.stdout = sys.__stdout__
 
@@ -73,7 +71,7 @@ class MatplotlibWidget(QMainWindow)
         self.printOutput.setTextCursor(cursor)
         self.printOutput.ensureCursorVisible()
 
-
+    #prints screenshot of app
     def print_widget(self):
         printer = QtPrintSupport.QPrinter()
         painter = QtGui.QPainter()
@@ -82,75 +80,87 @@ class MatplotlibWidget(QMainWindow)
         painter.drawPixmap(10,10,screen)
         painter.end()
 
-    def pred twist(self):
+    def pred_twist(self):
 
         #Access historical database - the following code enables access to an existing s
-        
-        username = "_______"
-        password = "_______"
+        #username = "_______"
+        #password = "_______"
 
-        sql = ("SELECT * FROM Table")
-        cnxn = pyodbc.connect('Driver={database};SERVER=server; Uid=username;Pwd=mam2pac$')
-        data = pd.read_sql(sql, cnxn)
+        #sql = ("SELECT * FROM Table")
+        #cnxn = pyodbc.connect('Driver={database};SERVER=server; Uid=username;Pwd=password')
+        #df = pd.read_sql(sql, cnxn)
 
 
-        file_path='C:\Users\mattl\Documents\projects\data.xlsx'
-        df=pd.read_excel(file_path)
+        file_path=r'C:\Users\mattl\Documents\projects\historical_data.csv'
+        df=pd.read_csv(file_path)
 
-        #input Parameters
+        #Input parameters
 
-        #assign init twist values in buttons
-        dt_lww_txt=self.lww_passes.text()
-        st_1_txt=self.stationEdit_1.text()
+        #assign initial twist values from UI inputs
+        passQty_txt=self.passQtyEdit.text()
+        seg1_txt=self.seg1Edit.text()
+        seg2_txt=self.seg2Edit.text()
+        seg3_txt=self.seg3Edit.text()
+        seg4_txt=self.seg4Edit.text()
+        seg5_txt=self.seg5Edit.text()
+        seg6_txt=self.seg6Edit.text()
+        seg7_txt=self.seg7Edit.text()
 
-        #convert Ui text inputs into ints
-        dt_lww =int(dt_ww_txt)
-        st_9=int(st_9_txt)
+        #convert UI text inputs into floats
+        passQty = int(passQty_txt)
+        seg1=float(seg1_txt)
+        seg2=float(seg2_txt)
+        seg3=float(seg3_txt)
+        seg4=float(seg4_txt)
+        seg5=float(seg5_txt)
+        seg6=float(seg6_txt)
+        seg7=float(seg7_txt)
 
-        mix_span = self.mixedBox.isChecked()
+        #build input list and transform into dataframe
+        twist=[seg1,seg2,seg3,seg4,seg5,seg6,seg7,passQty]
+        df_twist=pd.DataFrame(twist).T
 
-        df_filter=df[(df["DESIGN"]==''+ str(self.designBox.currentText()) +'') & (df["mat"]==''+ str(self.mat_comboBox.currentText()) +'')]
+        #filters historical data by alloy selected
+        alloy_filter=df[(df["ALLOY"]==''+ str(self.alloy_comboBox.currentText()) +'')]
 
-        if self.mat_comboBox.currentText() == ' ' and mix_span = False:
-            n_stat=11
-            X_df =df_filter[['1_TWIST','2_TWIST','DT QTY/DB QTY']].copy()
-            A=np.zeros((10,13))
-            b=np.zeros((1,10))
-            st_10=int(st_10_txt)
-            twist=[st_1,st_2]
-            twist.append(dt_lww)
-            twist.append(dt_rww)
-            twist.append(db_pass)
-            df_twist=pd.DataFrame(twist).T
-            a_twist=np.empty(n_stat-1)
-        
+        #creates "X" dataframe for future regression
+        X_df = alloy_filter[['PASS_QTY']].copy()
+
+        #number of segments with measurements
+        n_seg = 7          
 
 
         #initialize predicted twist array
-        a_twist=np.empty(n_stat-1)
-        ######################################################
+        A=np.zeros((7,10))
+        b=np.zeros((1,6))
+        a_twist=np.empty(n_seg-1)
+
+        
         
         i=0
 
-        for station in range(1,n_stat,1)
+        #iterates over each station to predict twist using historic data
+        for segment in range(1,n_seg,1):
 
-            y_df=df_filter[[''+ str(station) +'A_TWIST']].copy()
+            y_df=alloy_filter[['A_SEG' + str(segment) +'']].copy()
+
+            degree = 2 
 
             #Model Pipeline
             steps = [('scaler', StandardScaler()),
-            ('poly', PolynomialFeatures(degree),
-            ('model',LassoCV(n_jobs=-1,cv=4,max_iter=10000)]
+            ('poly', PolynomialFeatures(degree)),
+            ('model',LassoCV(n_jobs=-1,cv=4,max_iter=10000))]
 
             pipeline = Pipeline(steps)
             pipeline.fit(X_df,y_df)
 
-            pred_A=pipeline.predict(df_twist)
-            print("Station"+ str(station) +" Prediction Score:"+ str(np.round(pipeline.score(X_df,y_df)*100, decimals=1)) + "%")
+            pred_A = pipeline.predict(df_twist)
+            print("Segment"+ str(segment) +" Prediction Score:"+ str(np.round(pipeline.score(X_df,y_df)*100, decimals=1)) + "%")
 
-            a_twist[(station-1)]=np.round(pred_A,decimals=2)
+            a_twist[(segment-1)]=np.round(pred_A,decimals=2)
 
             #Build coefficient matrix
-            run_coef=pipeline.named_steps['model']),coef
+            run_coef=pipeline.named_steps['model'].coef_
             run_coef=np.delete(run_coef,0)
 
             A[i,:]=run_coef
@@ -158,28 +168,23 @@ class MatplotlibWidget(QMainWindow)
             #Build predictive matrix
             b[:,i]=pred_A
 
-            #A=np.vstack(run coef.axis=0)
-
             i+=1
 
-            self.completed += (100/(n stat))
+            self.completed += (100/(n_seg))
             self.progressBar.setValue(self.completed)
 
-        #place predicton array in dataframe for relaxation prediction
-        df_a_twist=pd.DataFrame(a_twist).T
+        
 
         a_twist=a_twist.T
-        x=list(range(1,n_stat))
+        x=list(range(1,n_seg))
 
         #fig, ax = plt.subplots(figsize=(8,4)
         self.MplWeldWidget.canvas.axes.cla()
-
-        self.MplWeldWidget.canvas.axes.plot(x, twist[0:(n_stat-1)],marker='.', label="Initial Twist")
+        self.MplWeldWidget.canvas.axes.plot(x, twist[0:(n_seg-1)],marker='.', label="Initial Twist")
         self.MplWeldWidget.canvas.axes.plot(x,a_twist, marker='v',label="Predicted Twist")
-
-        self.MplWeldWidget.canvas.axes.set_title("" + str(self.span_comboBox.currentText()) + " Twist - " + str(self.span_comboBox.currentText()) +"Span Cond. Passes", fontsize=8)
-        self.MplWeldWidget.canvas.axes.set_ylabel('Station Twist, mils',fontsize=8)
-        self.MplWeldWidget.canvas.axes.set_xlabel('Station',fontsize=8)
+        self.MplWeldWidget.canvas.axes.set_title("Predicted Twist per Segment", fontsize=8)
+        self.MplWeldWidget.canvas.axes.set_ylabel('Twist, mm',fontsize=8)
+        self.MplWeldWidget.canvas.axes.set_xlabel('Segment',fontsize=8)
         self.MplWeldWidget.canvas.axes.set_xticks(x)
         self.MplWeldWidget.canvas.axes.axhine(0.75,ls='--',color='red')
         self.MplWeldWidget.canvas.axes.axhine(-0.75,ls='--',color='red')
@@ -193,58 +198,11 @@ class MatplotlibWidget(QMainWindow)
             xytext=(0,10),
             ha='center')
 
-        self.MplWidget.canvas.draw()
+        self.MplWeldWidget.canvas.draw()
 
-        #Bow prediction
-        X_bow_df=X_df.join(df_filter["BOW"],how='right')
-        y_bow_df=df_filter[['A_BOW']].copy()
-
-        #Model Pipeline for Bow Prediction
-        bow_degree=1
-        steps = [('scaler', StandardScaler(),
-        ('poly', PolynomialFeatures(bow_degree),
-        ('model', LassoCV(n_jobs=-1,cv=4,max iter=10000))]
-
-    bow_pipeline = Pipeline(steps)
-    bow_pipeline.fit(X_bow_df,y_bow_df)
-
-    twist.append(bow)
-    df_twist_bow=pd.DataFrame(twist).T
-
-    pred_bow=bow_pipeline.predict(df_twist_bow)
-    print("____________________")
-    print("Predicted Bow: " + str(np.round(pred_bow, decimals=2) +"") 
-    print("Post- Bow Prediction Score: " + str(np.round(bow_pipeline.score(X_bow_df,y_bow_df)*100, decimals=2)) + "%")
-
-
-    ##Relaxation Prediction
-    r_df_filter=r_df[(r_df["DESIGN"]==''+ str(self.designBox.currentText()) +'') & (r_df["MAT"]==''+ str(self.mat_comboBox.currentText()) +'') & (r_df['RELAX'] == 'Yes')]
-
-    if self.mat_comboBox.currentText() ==:
-        X_relax=r_df_filter[['1M_TWIST']].copy()
-    else:
-        X_relax=r_df_filter[['1M_TWIST']].copy()
-
-    y_relax=r_df_filter[['DELTA_TWIST']].copy()
-
-    #Model Pipeline for Anneal Relaxation Prediction
-    relax_degree=1
-    steps = [('scaler', StandardScaler(),
-        ('poly', PolynomialFeatures(relax_degree),
-        ('model', LassoCV(n_jobs=-1,cv=4,max_iter=10000))]
-
-    relax_pipeline=Pipeline(steps)
-    relax_pipeline.fit(X_relax,y_relax)
-
-    pred_relax = relax_pipeline.predict(df_a_twist)
-    print("_______________________")
-    print("Predicted:" + str(np.round(pred_ relax, decimals=2)) + ")
-    print("Prediction Score:" + str(np.round(relax_pipeline.score(X_relax,y_relax)*100, decimals2)) + "%")    
-    print("_______________________")
-
-    #progress bar complete
-    self.completed=0
-    self.progressBar.setValue(self.completed)
+        #progress bar completion update
+        self.completed=0
+        self.progressBar.setValue(self.completed)
 
 class EmittingStream(QtCore.QObject):
     textWritten = QtCore.pyqtSignal(str)
@@ -253,6 +211,6 @@ class EmittingStream(QtCore.QObject):
         self.textWritten.emit(str(text))
 
 app=QApplication([])
-window.MatplotlibWidget()
+window=WeldPredictionMain()
 window.show()
 app.exec()

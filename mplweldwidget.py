@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import*
 from matplotlib.backends.backend_qt5agg import FigureCanvas
-fromm matplotlib.figure import FigureCanvas
+from matplotlib.figure import Figure
 
 class MplWeldWidget(QWidget):
 
