@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 import pandas as pd
+
 from PyQt5 import*
 from PyQt5.uic import loadUi
 #from PyQt5.QtWidgets import *
@@ -40,7 +41,7 @@ class MatplotlibWidget(QMainWindow)
 
         loadUi("C:\Users\mattl\Documents\projects\weld_mvmt_prediction_app\main_window.ui")
 
-        self.setWindowTitle("Weld Relaxation Prediction App")
+        self.setWindowTitle("Weld Movement Prediction App")
     
 	
 
@@ -83,11 +84,18 @@ class MatplotlibWidget(QMainWindow)
 
     def pred twist(self):
 
-        #Historical database
-        file_path='S.xlsx'
-        mech_file_path='s.xtsx'
+        #Access historical database - the following code enables access to an existing s
+        
+        username = "_______"
+        password = "_______"
+
+        sql = ("SELECT * FROM Table")
+        cnxn = pyodbc.connect('Driver={database};SERVER=server; Uid=username;Pwd=mam2pac$')
+        data = pd.read_sql(sql, cnxn)
+
+
+        file_path='C:\Users\mattl\Documents\projects\data.xlsx'
         df=pd.read_excel(file_path)
-        r_df=pd.read_excel(mech_file_path)
 
         #input Parameters
 
@@ -95,7 +103,7 @@ class MatplotlibWidget(QMainWindow)
         dt_lww_txt=self.lww_passes.text()
         st_1_txt=self.stationEdit_1.text()
 
-        #convert Ul text inguts into ints
+        #convert Ui text inputs into ints
         dt_lww =int(dt_ww_txt)
         st_9=int(st_9_txt)
 
@@ -112,48 +120,15 @@ class MatplotlibWidget(QMainWindow)
             twist=[st_1,st_2]
             twist.append(dt_lww)
             twist.append(dt_rww)
-            twist.apoend(db_pass)
+            twist.append(db_pass)
             df_twist=pd.DataFrame(twist).T
             a_twist=np.empty(n_stat-1)
         
-        elif self.mat_comboBox.currentText() ==' ' and mix_span == False:
-            n_stat=10
-            X_df=df_filter[['1_TWIST','2_TWIST','DT QTY/DB QTY']].copy()
-            A=np.zeros((9,12))
-            b=np.zeros((1,9))
-            twist=[st_1,st_2]
-            twist.append(dt_lww)
-            twist.append(dt_rww)
-            twist.apoend(db_pass)
-            df_twist=pd.DataFrame(twist).T
-            a_twist=np.empty(n_stat-1)
 
-        elif self.mat_comboBox.currentText() == ' ' and mix_span = True:
-            n_stat=10
-            X_df=df_filter[['1_TWIST','2_TWIST','DT QTY/DB QTY']].copy()
-            p.zeros[12,15))
-            t 10 intlt 10 tt)
-            twist=[st_1,st_2]
-            twist.append(dt_lww)
-            twist.append(dt_rww)
-            twist.apoend(db_pass)
-            df_twist=pd.DataFrame(twist).T
-            a_twist=np.empty(n_stat-1)
 
-        else
-            n_stat=10
-            X_df=df_filter[['1_TWIST','2_TWIST','DT QTY/DB QTY']].copy()
-            A=np.zeros((11,14))
-            b=np.zeros((1,9))
-            twist=[st_1,st_2]
-            twist.append(dt_lww)
-            twist.append(dt_rww)
-            twist.apoend(db_pass)
-            df_twist=pd.DataFrame(twist).T
-
-            #initialize predicted twist array
-            a_twist=np.empty(n_stat-1)
-            ######################################################
+        #initialize predicted twist array
+        a_twist=np.empty(n_stat-1)
+        ######################################################
         
         i=0
 
@@ -197,22 +172,22 @@ class MatplotlibWidget(QMainWindow)
         x=list(range(1,n_stat))
 
         #fig, ax = plt.subplots(figsize=(8,4)
-        self.MplWidget.canvas.axes.cla()
+        self.MplWeldWidget.canvas.axes.cla()
 
-        self.MplWidget.canvas.axes.plot(x, twist[0:(n_stat-1)],marker='.', label="Initial Twist")
-        self.MplWidget.canvas.axes.plot(x,a_twist, marker='v',label="Predicted Twist")
+        self.MplWeldWidget.canvas.axes.plot(x, twist[0:(n_stat-1)],marker='.', label="Initial Twist")
+        self.MplWeldWidget.canvas.axes.plot(x,a_twist, marker='v',label="Predicted Twist")
 
-        self.MplWidget.canvas.axes.set_title("" + str(self.span_comboBox.currentText()) + " Twist - " + str(self.span_comboBox.currentText()) +"Span Cond. Passes", fontsize=8)
-        self.MplWidget.canvas.axes.set_ylabel('Station Twist, mils',fontsize=8)
-        self.MolWidget.canvas.axes.set_xlabel('Station',fontsize=8)
-        self.MplWidget.canvas.axes.set_xticks(x)
-        self.MplWidget.canvas.axes.axhine(20,ls='--',color='red')
-        self.MplWidget.canvas.axes.axhine(-20,ls='--',color='red')
-        self.MplWidget.canvas.axes.legend(loc='lower left')
+        self.MplWeldWidget.canvas.axes.set_title("" + str(self.span_comboBox.currentText()) + " Twist - " + str(self.span_comboBox.currentText()) +"Span Cond. Passes", fontsize=8)
+        self.MplWeldWidget.canvas.axes.set_ylabel('Station Twist, mils',fontsize=8)
+        self.MplWeldWidget.canvas.axes.set_xlabel('Station',fontsize=8)
+        self.MplWeldWidget.canvas.axes.set_xticks(x)
+        self.MplWeldWidget.canvas.axes.axhine(0.75,ls='--',color='red')
+        self.MplWeldWidget.canvas.axes.axhine(-0.75,ls='--',color='red')
+        self.MplWeldWidget.canvas.axes.legend(loc='lower left')
 
         for u,v in zip(x,a_twist):
             label="{:.2f}".format(v)
-            self.MplWidget.canvas.axes.annotate(label,
+            self.MplWeldWidget.canvas.axes.annotate(label,
             (u,v),
             textcoords="offset points",
             xytext=(0,10),
@@ -243,7 +218,7 @@ class MatplotlibWidget(QMainWindow)
 
 
     ##Relaxation Prediction
-    r_df_filter=r_df[(r_df["DESIGN"]=="+ str(self.designBox.currentText()) +") & (r_df["MAT"]=="+ str(self.mat_comboBox.currentText()) +") & (r_df['RELAX'] == 'Yes')]
+    r_df_filter=r_df[(r_df["DESIGN"]==''+ str(self.designBox.currentText()) +'') & (r_df["MAT"]==''+ str(self.mat_comboBox.currentText()) +'') & (r_df['RELAX'] == 'Yes')]
 
     if self.mat_comboBox.currentText() ==:
         X_relax=r_df_filter[['1M_TWIST']].copy()
