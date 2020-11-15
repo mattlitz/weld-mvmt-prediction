@@ -53,9 +53,6 @@ class WeldPredictionMain(QMainWindow):
         self.completed=0
         self.progressBar.setValue(self.completed)
 
-        #initialize values
-        #self.guess_p.setText("0")
-
         #initialize alloy options
         self.alloy_comboBox.addItem("Ti-6Al-4V")
         self.alloy_comboBox.addItem("Mg AZ80A")
@@ -175,7 +172,7 @@ class WeldPredictionMain(QMainWindow):
         self.MplWeldWidget.canvas.axes.cla()
         self.MplWeldWidget.canvas.axes.plot(x, twist[0:(n_seg-1)],marker='.', label="Initial Twist")
         self.MplWeldWidget.canvas.axes.plot(x,a_twist, marker='v',label="Predicted Twist")
-        self.MplWeldWidget.canvas.axes.set_title("Predicted Twist per Segment", fontsize=8)
+        self.MplWeldWidget.canvas.axes.set_title("Predicted Twist per Segment", fontsize=10)
         self.MplWeldWidget.canvas.axes.set_ylabel('Twist, mm',fontsize=8)
         self.MplWeldWidget.canvas.axes.set_xlabel('Segment',fontsize=8)
         self.MplWeldWidget.canvas.axes.set_xticks(x)
