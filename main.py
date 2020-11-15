@@ -121,18 +121,16 @@ class WeldPredictionMain(QMainWindow):
         df_twist=pd.DataFrame(twist).T
 
         #filters historical data by alloy selected
-        alloy_filter=df[(df["ALLOY"]==''+ str(self.alloy_comboBox.currentText()) +'')]
+        alloy_filter=df[(df['ALLOY']==''+ str(self.alloy_comboBox.currentText()) +'')]
 
         #creates "X" dataframe for future regression
-        X_df = alloy_filter[['PASS_QTY']].copy()
+        X_df = alloy_filter[['SEG1','SEG2','SEG3','SEG4','SEG5','SEG6','SEG7','PASS_QTY']].copy()
 
         #number of segments with measurements
         n_seg = 7          
 
 
         #initialize predicted twist array
-        A=np.zeros((7,10))
-        b=np.zeros((1,6))
         a_twist=np.empty(n_seg-1)
 
         
@@ -155,18 +153,13 @@ class WeldPredictionMain(QMainWindow):
             pipeline.fit(X_df,y_df)
 
             pred_A = pipeline.predict(df_twist)
-            print("Segment"+ str(segment) +" Prediction Score:"+ str(np.round(pipeline.score(X_df,y_df)*100, decimals=1)) + "%")
+            print("Segment "+ str(segment) +" Prediction Score:"+ str(np.round(pipeline.score(X_df,y_df)*100, decimals=1)) + "%")
 
             a_twist[(segment-1)]=np.round(pred_A,decimals=2)
 
             #Build coefficient matrix
             run_coef=pipeline.named_steps['model'].coef_
             run_coef=np.delete(run_coef,0)
-
-            A[i,:]=run_coef
-
-            #Build predictive matrix
-            b[:,i]=pred_A
 
             i+=1
 
@@ -186,8 +179,8 @@ class WeldPredictionMain(QMainWindow):
         self.MplWeldWidget.canvas.axes.set_ylabel('Twist, mm',fontsize=8)
         self.MplWeldWidget.canvas.axes.set_xlabel('Segment',fontsize=8)
         self.MplWeldWidget.canvas.axes.set_xticks(x)
-        self.MplWeldWidget.canvas.axes.axhine(0.75,ls='--',color='red')
-        self.MplWeldWidget.canvas.axes.axhine(-0.75,ls='--',color='red')
+        self.MplWeldWidget.canvas.axes.axhline(0.75,ls='--',color='red')
+        self.MplWeldWidget.canvas.axes.axhline(-0.75,ls='--',color='red')
         self.MplWeldWidget.canvas.axes.legend(loc='lower left')
 
         for u,v in zip(x,a_twist):
