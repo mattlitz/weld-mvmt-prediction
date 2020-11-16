@@ -23,6 +23,7 @@ from mplweldwidget import MplWeldWidget
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.figure import Figure
 
+#detail resource file detail.py
 import detail
 
 
@@ -42,7 +43,7 @@ class WeldPredictionMain(QMainWindow):
 
         loadUi(r"C:\Users\mattl\Documents\projects\weld-mvmt-prediction\main_window.ui",self)
 
-        self.setWindowTitle("Weld Movement Prediction App")
+        self.setWindowTitle("Weld Movement Prediction")
         #self.setWindowIcon(QtGui.QIcon('C:\logo.jpg'))
 
         self.calculateButton.clicked.connect(self.pred_twist)
@@ -62,6 +63,8 @@ class WeldPredictionMain(QMainWindow):
     def __del__(self):
         sys.stdout = sys.__stdout__
 
+    
+    #function for output to "printOutput" label
     def normalOutputWritten(self,text):
         cursor=self.printOutput.textCursor()
         cursor.movePosition(QtGui.QTextCursor.End)
@@ -78,6 +81,7 @@ class WeldPredictionMain(QMainWindow):
         painter.drawPixmap(10,10,screen)
         painter.end()
 
+    #main function
     def pred_twist(self):
 
         #Access historical database - the following code enables access to an existing s
@@ -88,7 +92,7 @@ class WeldPredictionMain(QMainWindow):
         #cnxn = pyodbc.connect('Driver={database};SERVER=server; Uid=username;Pwd=password')
         #df = pd.read_sql(sql, cnxn)
 
-
+        #Historical data located in excel spreadsheet
         file_path=r'C:\Users\mattl\Documents\projects\historical_data.csv'
         df=pd.read_csv(file_path)
 
@@ -127,19 +131,18 @@ class WeldPredictionMain(QMainWindow):
         #number of segments with measurements
         n_seg = 7          
 
-
         #initialize predicted twist array
-        a_twist=np.empty(n_seg-1)
-
-        
-        
+        a_twist=np.empty(n_seg)
+      
         i=0
 
         #iterates over each station to predict twist using historic data
-        for segment in range(1,n_seg,1):
+        for segment in range(1,n_seg+1,1):
 
             y_df=alloy_filter[['A_SEG' + str(segment) +'']].copy()
 
+
+            #number of polynomial degrees
             degree = 2 
 
             #Model Pipeline
@@ -167,11 +170,11 @@ class WeldPredictionMain(QMainWindow):
         
 
         a_twist=a_twist.T
-        x=list(range(1,n_seg))
+        x=list(range(1,n_seg+1))
 
-        #fig, ax = plt.subplots(figsize=(8,4)
+        #fig, ax = plt.subplots(figsize=(8,4))
         self.MplWeldWidget.canvas.axes.cla()
-        self.MplWeldWidget.canvas.axes.plot(x, twist[0:(n_seg-1)],marker='.', label="Initial Twist")
+        self.MplWeldWidget.canvas.axes.plot(x, twist[0:(n_seg)],marker='.', label="Initial Twist")
         self.MplWeldWidget.canvas.axes.plot(x,a_twist, marker='v',label="Predicted Twist")
         self.MplWeldWidget.canvas.axes.set_title("Predicted Twist per Segment", fontsize=10)
         self.MplWeldWidget.canvas.axes.set_ylabel('Twist, mm',fontsize=8)
