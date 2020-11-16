@@ -371,6 +371,28 @@
      </property>
     </widget>
    </widget>
+   <widget class="QLabel" name="label_10">
+    <property name="geometry">
+     <rect>
+      <x>680</x>
+      <y>300</y>
+      <width>301</width>
+      <height>111</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-image: url(:/model/model.png);</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap resource="detail.qrc">:/model/model.png</pixmap>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -407,6 +429,8 @@
   <tabstop>exitButton</tabstop>
   <tabstop>printOutput</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="detail.qrc"/>
+ </resources>
  <connections/>
 </ui>
