@@ -23,7 +23,8 @@ from mplweldwidget import MplWeldWidget
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.figure import Figure
 
-#import logos..
+import detail
+
 
 def show_exception_and_exit(exc_type,exc_value,tb):
     import traceback
