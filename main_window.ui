@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1030</width>
+    <width>1040</width>
     <height>583</height>
    </rect>
   </property>
@@ -59,7 +59,7 @@
      <rect>
       <x>430</x>
       <y>490</y>
-      <width>241</width>
+      <width>291</width>
       <height>41</height>
      </rect>
     </property>
@@ -376,8 +376,8 @@
      <rect>
       <x>690</x>
       <y>280</y>
-      <width>331</width>
-      <height>121</height>
+      <width>341</width>
+      <height>101</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -419,7 +419,7 @@
      <rect>
       <x>690</x>
       <y>260</y>
-      <width>71</width>
+      <width>111</width>
       <height>16</height>
      </rect>
     </property>
@@ -429,7 +429,105 @@
      </font>
     </property>
     <property name="text">
-     <string>Schematic</string>
+     <string>Stock Schematic</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_13">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>111</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Instructions:</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::RichText</enum>
+    </property>
+    <property name="indent">
+     <number>2</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_14">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>311</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>1)  Select the stock material</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::RichText</enum>
+    </property>
+    <property name="indent">
+     <number>2</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_15">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>50</y>
+      <width>311</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>2)  Select the quantity of passes for round</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::RichText</enum>
+    </property>
+    <property name="indent">
+     <number>2</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_16">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>70</y>
+      <width>311</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>3)  Enter initial shape data and click &quot;Calculate&quot;</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::RichText</enum>
+    </property>
+    <property name="indent">
+     <number>2</number>
     </property>
    </widget>
   </widget>
@@ -438,7 +536,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1030</width>
+     <width>1040</width>
      <height>21</height>
     </rect>
    </property>

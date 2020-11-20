@@ -24,6 +24,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.figure import Figure
 
 #detail resource file detail.py
+#pyrcc5 -o resources.py resource/resources.qrc
 import detail
 
 
@@ -72,7 +73,7 @@ class WeldPredictionMain(QMainWindow):
         self.printOutput.setTextCursor(cursor)
         self.printOutput.ensureCursorVisible()
 
-    #prints screenshot of app
+    #prints screenshot of UI
     def print_widget(self):
         printer = QtPrintSupport.QPrinter()
         painter = QtGui.QPainter()
@@ -84,7 +85,7 @@ class WeldPredictionMain(QMainWindow):
     #main function
     def pred_twist(self):
 
-        #Access historical database - the following code enables access to an existing s
+        #Database Access - the following code enables access to data stored on a database
         #username = "_______"
         #password = "_______"
 
@@ -140,8 +141,7 @@ class WeldPredictionMain(QMainWindow):
         for segment in range(1,n_seg+1,1):
 
             y_df=alloy_filter[['A_SEG' + str(segment) +'']].copy()
-
-
+            
             #number of polynomial degrees
             degree = 2 
 
@@ -154,13 +154,9 @@ class WeldPredictionMain(QMainWindow):
             pipeline.fit(X_df,y_df)
 
             pred_A = pipeline.predict(df_twist)
-            print("Segment "+ str(segment) +" Prediction Score:"+ str(np.round(pipeline.score(X_df,y_df)*100, decimals=1)) + "%")
+            print("Segment "+ str(segment) +" Prediction Score: "+ str(np.round(pipeline.score(X_df,y_df)*100, decimals=1)) + "%")
 
             a_twist[(segment-1)]=np.round(pred_A,decimals=2)
-
-            #Build coefficient matrix
-            run_coef=pipeline.named_steps['model'].coef_
-            run_coef=np.delete(run_coef,0)
 
             i+=1
 
